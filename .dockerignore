@@ -1,0 +1,58 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist
+build
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Test coverage
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+
+# Scripts (không cần cho production)
+reset-db.ts
+run-reset.js
+
+# Documentation
+*.md
+README.md
+API_FLOW.md
+PROJECT_SUMMARY.md
+SEQUENCE_DIAGRAM.md
+PAYMENT_SETUP.md
+
+# Docker files (không cần trong image)
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Misc
+.cache
+.temp
+.tmp
