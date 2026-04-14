@@ -59,3 +59,11 @@ ehthumbs.db
 # ==========================================
 logs/
 *.log
+
+dbmstn-firebase-adminsdk-fbsvc-296eeed0b7.json
+test-reviews-api.js.map
+test-reviews-api.js
+test-reviews-api.d.ts
+FIRESTORE_API_TESTING.md
+FIRESTORE_MIGRATION.md
+REVIEWS_FIRESTORE_MIGRATION.md

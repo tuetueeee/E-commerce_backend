@@ -27,52 +27,11 @@ import {
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  async create(
-    @Request() req,
-    @Body() createReviewDto: CreateReviewDto,
-  ): Promise<ReviewResponseDto> {
-    return this.reviewsService.create(req.user.id, createReviewDto);
-  }
-
-  @Get()
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  async findAll(@Query() queryDto: ReviewQueryDto): Promise<{
-    reviews: ReviewResponseDto[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
-    return this.reviewsService.findAll(queryDto);
-  }
-
+  // Specific GET routes first (most specific)
   @Get('stats')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async getReviewStats(): Promise<ReviewStatsDto> {
     return this.reviewsService.getReviewStats();
-  }
-
-  @Get('product/:productId')
-  async getProductReviews(
-    @Param('productId', ParseUUIDPipe) productId: string,
-    @Query() queryDto: ReviewQueryDto,
-  ): Promise<{
-    reviews: ReviewResponseDto[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
-    return this.reviewsService.findByProduct(productId, queryDto);
-  }
-
-  @Get('product/:productId/stats')
-  async getProductReviewStats(
-    @Param('productId', ParseUUIDPipe) productId: string,
-  ): Promise<ProductReviewStatsDto> {
-    return this.reviewsService.getProductReviewStats(productId);
   }
 
   @Get('my-reviews')
@@ -90,6 +49,41 @@ export class ReviewsController {
     return this.reviewsService.findByUser(req.user.id, queryDto);
   }
 
+  @Get('product/:productId/stats')
+  async getProductReviewStats(
+    @Param('productId', ParseUUIDPipe) productId: string,
+  ): Promise<ProductReviewStatsDto> {
+    return this.reviewsService.getProductReviewStats(productId);
+  }
+
+  @Get('product/:productId')
+  async getProductReviews(
+    @Param('productId', ParseUUIDPipe) productId: string,
+    @Query() queryDto: ReviewQueryDto,
+  ): Promise<{
+    reviews: ReviewResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    return this.reviewsService.findByProduct(productId, queryDto);
+  }
+
+  // Collection route (list all) - admin only - must come before catch-all :id
+  @Get()
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async findAll(@Query() queryDto: ReviewQueryDto): Promise<{
+    reviews: ReviewResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    return this.reviewsService.findAll(queryDto);
+  }
+
+  // Generic ID route last (catch-all)
   @Get(':id')
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
@@ -97,6 +91,17 @@ export class ReviewsController {
     return this.reviewsService.findOne(id);
   }
 
+  // POST routes
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async create(
+    @Request() req,
+    @Body() createReviewDto: CreateReviewDto,
+  ): Promise<ReviewResponseDto> {
+    return this.reviewsService.create(req.user.id, createReviewDto);
+  }
+
+  // PATCH routes
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(
@@ -115,6 +120,7 @@ export class ReviewsController {
     return this.reviewsService.verifyReview(id);
   }
 
+  // DELETE routes
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   async remove(

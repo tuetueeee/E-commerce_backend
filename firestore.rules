@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reviews collection
+    // Structure: /reviews/{reviewId}
+    // Fields: userId, productId, rating, comment, orderId, designId, 
+    //         media_url, isVerified, isActive, createdAt, updatedAt
+    
+    match /reviews/{reviewId} {
+      
+      // Allow users to read all active reviews (public)
+      allow read: if request.auth != null && 
+                     resource.data.isActive == true;
+      
+      // Allow authenticated users to create reviews
+      // - Must be creating a review for themselves (userId matches auth user)
+      // - Rating must be between 1-5
+      allow create: if request.auth != null &&
+                       request.auth.uid == request.resource.data.userId &&
+                       request.resource.data.rating >= 1 &&
+                       request.resource.data.rating <= 5 &&
+                       request.resource.data.isActive == true &&
+                       request.resource.data.isVerified == false;
+      
+      // Allow users to update their own reviews
+      // - Only the review owner can update
+      // - Cannot modify userId, productId, or isVerified (admin only)
+      // - Rating must remain between 1-5
+      allow update: if request.auth != null &&
+                       request.auth.uid == resource.data.userId &&
+                       !('userId' in request.resource.data.diff()) &&
+                       !('productId' in request.resource.data.diff()) &&
+                       !('isVerified' in request.resource.data.diff()) &&
+                       !('createdAt' in request.resource.data.diff()) &&
+                       request.resource.data.rating >= 1 &&
+                       request.resource.data.rating <= 5;
+      
+      // Allow users to delete their own reviews (soft delete)
+      allow delete: if request.auth != null &&
+                       request.auth.uid == resource.data.userId;
+      
+      // Admin operations (verify reviews, force delete)
+      // Note: You should check for admin role in your application logic
+      // This rule allows any authenticated user to read all fields
+      // In production, implement custom claims check
+      match /admin/{admins=**} {
+        allow read, write: if request.auth != null &&
+                             request.auth.token.admin == true;
+      }
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
