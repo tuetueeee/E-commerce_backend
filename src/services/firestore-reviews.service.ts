@@ -42,6 +42,7 @@ export class FirestoreReviewsService {
     comment?: string,
     orderId?: string,
     designId?: string,
+    isVerified: boolean = false,
   ): Promise<ReviewResponseDto> {
     try {
       // Check if user has already reviewed this product
@@ -67,7 +68,7 @@ export class FirestoreReviewsService {
         orderId: orderId || null,
         designId: designId || null,
         media_url: null,
-        isVerified: false,
+        isVerified,
         isActive: true,
         createdAt: admin.firestore.Timestamp.now(),
         updatedAt: admin.firestore.Timestamp.now(),

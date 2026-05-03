@@ -9,6 +9,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Review } from '../../entities/review.entity';
 import { Product } from '../../entities/product.entity';
 import { User } from '../../entities/user.entity';
+import { Order, OrderStatus } from '../../entities/order.entity';
 import {
   CreateReviewDto,
   UpdateReviewDto,
@@ -28,6 +29,8 @@ export class ReviewsService {
     private productRepository: Repository<Product>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Order)
+    private orderRepository: Repository<Order>,
     private dataSource: DataSource,
     private firestoreReviewsService: FirestoreReviewsService,
   ) {}
@@ -36,7 +39,7 @@ export class ReviewsService {
     userId: string,
     createReviewDto: CreateReviewDto,
   ): Promise<ReviewResponseDto> {
-    const { productId, rating, comment } = createReviewDto;
+    const { productId, rating, comment, orderId } = createReviewDto;
 
     // Check if product exists
     const product = await this.productRepository.findOne({
@@ -44,6 +47,30 @@ export class ReviewsService {
     });
     if (!product) {
       throw new NotFoundException('Product not found');
+    }
+
+    // Logic for Auto-verification (isVerified)
+    let isVerified = false;
+    let finalOrderId = orderId;
+
+    // Search for a delivered order containing this product
+    const orderQuery = this.orderRepository
+      .createQueryBuilder('order')
+      .innerJoin('order.items', 'item')
+      .where('order.userId = :userId', { userId })
+      .andWhere('item.productId = :productId', { productId })
+      .andWhere('order.Status = :status', { status: OrderStatus.DELIVERED });
+
+    if (orderId) {
+      orderQuery.andWhere('order.id = :orderId', { orderId });
+    }
+
+    const deliveredOrder = await orderQuery.getOne();
+
+    if (deliveredOrder) {
+      isVerified = true;
+      finalOrderId = deliveredOrder.id;
+      console.log(`✅ Order found: ${deliveredOrder.id}. Review will be marked as Verified.`);
     }
 
     // Create review ONLY in Firestore
@@ -54,6 +81,9 @@ export class ReviewsService {
         productId,
         rating,
         comment,
+        finalOrderId,
+        undefined, // designId
+        isVerified,
       );
       console.log('✅ Review successfully saved to Firestore:', review.id);
 
