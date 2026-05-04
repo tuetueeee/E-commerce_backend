@@ -1,8 +1,12 @@
-import * as admin from 'firebase-admin';
 import { Injectable } from '@nestjs/common';
+import * as admin from 'firebase-admin';
 
 @Injectable()
 export class FirebaseConfig {
+  private static firebaseAppInstance: admin.app.App | null = null;
+  private static firestoreInstance: admin.firestore.Firestore | null = null;
+  private static firestoreConfigured = false;
+
   private firebaseApp: admin.app.App;
   public db: admin.firestore.Firestore;
 
@@ -12,12 +16,9 @@ export class FirebaseConfig {
 
   private initializeFirebase() {
     try {
-      // Check if Firebase is already initialized
-      const apps = admin.apps;
-      if (apps.length > 0) {
-        this.firebaseApp = apps[0] as admin.app.App;
+      if (FirebaseConfig.firebaseAppInstance) {
+        this.firebaseApp = FirebaseConfig.firebaseAppInstance;
       } else {
-        // Initialize Firebase Admin SDK
         const serviceAccount = {
           projectId: process.env.FIREBASE_PROJECT_ID,
           privateKeyId: process.env.FIREBASE_PRIVATE_KEY_ID,
@@ -35,19 +36,26 @@ export class FirebaseConfig {
           credential: admin.credential.cert(serviceAccount as any),
           projectId: process.env.FIREBASE_PROJECT_ID,
         });
+        FirebaseConfig.firebaseAppInstance = this.firebaseApp;
       }
 
-      // Get Firestore instance
-      this.db = admin.firestore(this.firebaseApp);
+      if (FirebaseConfig.firestoreInstance) {
+        this.db = FirebaseConfig.firestoreInstance;
+      } else {
+        this.db = admin.firestore(this.firebaseApp);
+        FirebaseConfig.firestoreInstance = this.db;
+      }
 
-      // Set Firestore settings
-      this.db.settings({
-        ignoreUndefinedProperties: true,
-      });
+      if (!FirebaseConfig.firestoreConfigured) {
+        this.db.settings({
+          ignoreUndefinedProperties: true,
+        });
+        FirebaseConfig.firestoreConfigured = true;
+      }
 
-      console.log('✅ Firebase initialized successfully');
+      console.log('Firebase initialized successfully');
     } catch (error) {
-      console.error('❌ Firebase initialization failed:', error);
+      console.error('Firebase initialization failed:', error);
       throw error;
     }
   }
