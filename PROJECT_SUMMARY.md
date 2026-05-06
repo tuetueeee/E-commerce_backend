@@ -16,10 +16,9 @@ Dự án backend TMDT đã hoàn thành **100%** với tất cả các tính nă
 
 ### 2. Database Configuration ✅
 - ✅ **PostgreSQL** - SQL database for core data (users, products, orders)
-- ✅ **Neo4j** - Graph database for AI recommendations
 - ✅ **TypeORM** - ORM with 45+ entities and relationships
 - ✅ **Data seeding** - 1000+ sample products, users, orders
-- ✅ **Docker Compose** - One-click setup for both databases
+- ✅ **Docker Compose** - One-click setup for the database
 
 ### 3. API Endpoints Documentation 📚
 - ✅ **106+ fully documented API endpoints**
@@ -38,12 +37,10 @@ Dự án backend TMDT đã hoàn thành **100%** với tất cả các tính nă
 - ✅ **Reviews & Ratings** - Product reviews, ratings, helpful votes
 - ✅ **Rewards System** - Earn points, redeem for vouchers
 
-### 5. Neo4j AI Features 🤖
-- ✅ **Trending Products** - Most popular items
-- ✅ **Similar Products** - Related item recommendations
-- ✅ **Frequently Bought Together** - Co-purchase suggestions
-- ✅ **Category-based Similarity** - Products in same category
-- ✅ **Auto-sync** - Products sync when db:reset runs
+### 5. Recommendation Endpoints 🤖
+- ✅ **Trending Products** - Most popular items (top-rated)
+- ✅ **Similar Products** - Same-category recommendations
+- ✅ **Personalized For-You** - Trending blanks for the user
 
 ### 6. Admin Management Dashboard 👨‍💼
 - ✅ **Dashboard Stats** - Revenue, orders, growth metrics
@@ -82,7 +79,7 @@ backend/
 │   ├── services/                # Business logic services
 │   └── main.ts                  # Application entry point
 ├── test/                        # E2E tests
-├── docker-compose.yml           # PostgreSQL + Neo4j + pgAdmin
+├── docker-compose.yml           # PostgreSQL + pgAdmin
 ├── package.json                 # 50+ dependencies
 ├── API_FLOW.md                  # 900+ lines - Complete API docs
 ├── SEQUENCE_DIAGRAM.md          # 700+ lines - Flow diagrams
@@ -99,7 +96,6 @@ backend/
 | **Framework** | NestJS | 11.0.1 |
 | **Language** | TypeScript | 5.7.3 |
 | **SQL Database** | PostgreSQL | 16 |
-| **Graph Database** | Neo4j | 5 |
 | **ORM** | TypeORM | 0.3.27 |
 | **Authentication** | JWT | NestJS JWT |
 | **Payment** | VNPay | Sandbox API |
@@ -185,7 +181,6 @@ Setup and usage guide:
 - Quick start instructions
 - Full setup guide
 - Database configuration
-- Neo4j setup
 - Troubleshooting
 - Code structure
 
@@ -222,10 +217,9 @@ Setup and usage guide:
 - 🏷️ **Catalog** - Manage sizes, materials, print methods
 - 📈 **Analytics** - User stats, trends
 
-### AI Features (Neo4j)
-- 🤖 **Trending Products** - Most popular items
-- 🔗 **Similar Products** - Related recommendations
-- 🛍️ **Frequently Bought Together** - Co-purchase suggestions
+### Recommendation Features
+- 🤖 **Trending Products** - Top-rated items
+- 🔗 **Similar Products** - Same-category recommendations
 
 ---
 
@@ -300,7 +294,6 @@ The backend is production-ready:
 - ✅ Input validation
 - ✅ API documentation
 - ✅ Docker support
-- ✅ Neo4j for scalability
 - ✅ Payment integration (VNPay)
 - ✅ Email service (Nodemailer)
 
@@ -322,7 +315,6 @@ The backend is production-ready:
 - **Flow Diagrams**: See [SEQUENCE_DIAGRAM.md](./SEQUENCE_DIAGRAM.md)
 - **Setup Guide**: See [README.md](./README.md)
 - **Payment Setup**: See [PAYMENT_SETUP.md](./PAYMENT_SETUP.md)
-- **Neo4j Guide**: Check README.md > Neo4j Setup section
 
 ---
 

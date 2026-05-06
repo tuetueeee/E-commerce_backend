@@ -6,7 +6,6 @@ import { CartController } from './cart.controller';
 import { Product } from '../../entities/product.entity';
 import { User } from '../../entities/user.entity';
 import { VouchersModule } from '../vouchers/vouchers.module';
-import { Neo4jService } from '../../config/neo4j.config';
 import { FirebaseConfig } from '../../config/firebase.config';
 import { FirestoreCartService } from './firestore-cart.service';
 
@@ -17,7 +16,7 @@ import { FirestoreCartService } from './firestore-cart.service';
     VouchersModule,
   ],
   controllers: [CartController],
-  providers: [CartService, FirestoreCartService, FirebaseConfig, Neo4jService],
+  providers: [CartService, FirestoreCartService, FirebaseConfig],
   exports: [CartService],
 })
 export class CartModule {}

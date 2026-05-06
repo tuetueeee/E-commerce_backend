@@ -39,7 +39,6 @@
     "cors": "^2.8.5",
     "firebase-admin": "^13.8.0",
     "handlebars": "^4.7.8",
-    "neo4j-driver": "^6.0.0",
     "nodemailer": "^7.0.11",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

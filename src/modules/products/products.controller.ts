@@ -108,20 +108,6 @@ export class ProductsController {
     return this.productsService.getSimilarProducts(id, limitInt);
   }
 
-  @Get('ai/frequently-bought/:id')
-  @ApiOperation({
-    summary: 'Get frequently bought together (AI - Co-purchase analysis)',
-  })
-  @ApiParam({ name: 'id', type: 'string', description: 'Product ID' })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  async getFrequentlyBoughtTogether(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Query('limit') limit?: number,
-  ): Promise<ProductResponseDto[]> {
-    const limitInt = limit ? Math.floor(Number(limit)) || 5 : 5;
-    return this.productsService.getFrequentlyBoughtTogether(id, limitInt);
-  }
-
   // Specific product endpoints - MUST be before @Get(':id')
   @Get('blanks')
   @ApiOperation({

@@ -23,7 +23,6 @@ import {
 } from '../../dto/order.dto';
 import { EmailService } from '../../services/email.service';
 import { InventoryService } from '../inventory/inventory.service';
-import { Neo4jService } from '../../config/neo4j.config';
 
 @Injectable()
 export class OrdersService {
@@ -45,7 +44,6 @@ export class OrdersService {
     private dataSource: DataSource,
     private emailService: EmailService,
     private inventoryService: InventoryService,
-    private neo4jService: Neo4jService,
   ) {}
 
   async create(
@@ -284,62 +282,6 @@ export class OrdersService {
       }
 
       await queryRunner.commitTransaction();
-
-      // Create Neo4j purchase relationships (non-blocking)
-      if (this.neo4jService.isReady()) {
-        try {
-          // Create purchase relationships for each product
-          for (const item of orderItems) {
-            await this.neo4jService.createPurchaseRelationship(
-              userId,
-              item.productId,
-              item.qty,
-              0, // rating will be updated when user reviews
-            );
-
-            // Create product nodes if they don't exist (only for blanks)
-            const product = await this.productRepository
-              .createQueryBuilder('product')
-              .leftJoinAndSelect('product.category', 'category')
-              .where('product.id = :id', { id: item.productId })
-              .andWhere('product.isActive = :isActive', { isActive: true })
-              .andWhere(
-                'NOT EXISTS (SELECT 1 FROM sku_variants sv WHERE sv."productId" = product.id)',
-              )
-              .getOne();
-            if (product) {
-              await this.neo4jService.createProduct(
-                product.id,
-                product.name,
-                product.category?.id || '',
-                product.price,
-                product.rating || 0,
-              );
-              if (product.category?.id) {
-                await this.neo4jService.linkProductToCategory(
-                  product.id,
-                  product.category.id,
-                );
-              }
-            }
-          }
-
-          // Create co-purchase relationships (products bought together in same order)
-          for (let i = 0; i < orderItems.length; i++) {
-            for (let j = i + 1; j < orderItems.length; j++) {
-              await this.neo4jService.createCoPurchaseRelationship(
-                orderItems[i].productId,
-                orderItems[j].productId,
-              );
-            }
-          }
-        } catch (error) {
-          this.logger.warn(
-            `Failed to create Neo4j relationships: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          );
-          // Don't throw - Neo4j is not critical for order creation
-        }
-      }
 
       // Get user email for order confirmation
       const userEmail = user.email;

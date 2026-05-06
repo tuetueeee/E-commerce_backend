@@ -5,13 +5,9 @@ import { Design } from '../../entities/design.entity';
 import { DesignAsset } from '../../entities/design-asset.entity';
 import { DesignPlacement } from '../../entities/design-placement.entity';
 import { DesignStatus } from '../../entities/design.entity';
-import { Neo4jService } from '../../config/neo4j.config';
-import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class DesignsService {
-  private readonly logger = new Logger(DesignsService.name);
-
   constructor(
     @InjectRepository(Design)
     private designRepository: Repository<Design>,
@@ -19,7 +15,6 @@ export class DesignsService {
     private designAssetRepository: Repository<DesignAsset>,
     @InjectRepository(DesignPlacement)
     private designPlacementRepository: Repository<DesignPlacement>,
-    private neo4jService: Neo4jService,
   ) {}
 
   async findAll(filters?: {
@@ -218,64 +213,13 @@ export class DesignsService {
     return { designs: transformedDesigns as Design[], total };
   }
 
-  /**
-   * Get recommended designs for user (Personalized AI Recommendations)
-   */
   async getRecommendedForUser(
-    userId: string,
+    _userId: string,
     limit: number = 5,
   ): Promise<Design[]> {
-    try {
-      if (!this.neo4jService.isReady()) {
-        // Fallback: return trending designs
-        return this.getTrendingDesigns(limit);
-      }
-
-      const recommended = await this.neo4jService.getRecommendedDesigns(
-        userId,
-        limit * 2, // Get more to filter
-      );
-
-      if (recommended.length === 0) {
-        // No recommendations, fallback to trending
-        return this.getTrendingDesigns(limit);
-      }
-
-      const designs = await Promise.all(
-        recommended.map((item) =>
-          this.designRepository.findOne({
-            where: { DESIGN_ID: item.id, status: DesignStatus.APPROVED },
-            relations: ['assets', 'category'],
-          }),
-        ),
-      );
-
-      const validDesigns = designs.filter((d) => d !== null);
-
-      // If we don't have enough, fill with trending
-      if (validDesigns.length < limit) {
-        const trending = await this.getTrendingDesigns(
-          limit - validDesigns.length,
-        );
-        // Avoid duplicates
-        const existingIds = new Set(validDesigns.map((d) => d.DESIGN_ID));
-        const additional = trending.filter(
-          (d) => !existingIds.has(d.DESIGN_ID),
-        );
-        return [...validDesigns, ...additional].slice(0, limit);
-      }
-
-      return validDesigns.slice(0, limit);
-    } catch (error) {
-      this.logger.warn(`Error getting design recommendations: ${error.message}`);
-      // Fallback to trending on error
-      return this.getTrendingDesigns(limit);
-    }
+    return this.getTrendingDesigns(limit);
   }
 
-  /**
-   * Get trending designs (fallback for recommendations)
-   */
   private async getTrendingDesigns(limit: number): Promise<Design[]> {
     const designs = await this.designRepository.find({
       where: { status: DesignStatus.APPROVED },

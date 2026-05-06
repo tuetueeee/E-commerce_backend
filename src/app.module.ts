@@ -21,7 +21,6 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
 import { RewardsModule } from './modules/rewards/rewards.module';
 import { VouchersModule } from './modules/vouchers/vouchers.module';
 import { ContactModule } from './modules/contact/contact.module';
-import { Neo4jService } from './config/neo4j.config';
 import { getDatabaseConfig } from './config/database.config';
 import { User } from './entities/user.entity';
 import { Product } from './entities/product.entity';
@@ -151,6 +150,6 @@ import { PaymentModule } from './modules/payment/payment.module';
     PaymentModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService, Neo4jService],
+  providers: [AppService],
 })
 export class AppModule {}

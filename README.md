@@ -153,7 +153,7 @@ docker run -d \
   postgres:15
 ```
 
-#### Option C: Use docker-compose (PostgreSQL + Neo4j + pgAdmin)
+#### Option C: Use docker-compose (PostgreSQL + pgAdmin)
 
 **Best option - runs everything needed:**
 
@@ -166,11 +166,9 @@ docker-compose up -d
 **What this starts:**
 - ✅ **PostgreSQL** (port 5432) - Main database
 - ✅ **pgAdmin** (port 5050) - Database UI (admin/admin)
-- ✅ **Neo4j** (port 7687, 7474) - Graph database for AI recommendations
 
 **Access services:**
 - pgAdmin: http://localhost:5050
-- Neo4j Browser: http://localhost:7474
 
 **Add to .env file:**
 ```env
@@ -179,11 +177,6 @@ DB_HOST=postgres
 DB_USER=myuser
 DB_PASSWORD=mypassword
 DB_DATABASE=mydatabase
-
-# Neo4j config
-NEO4J_URI=bolt://neo4j:7687
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=mypassword
 ```
 
 ### 5. Run Database Setup
@@ -228,29 +221,6 @@ npm run start:dev
 ```
 
 **Server is running at:** http://localhost:5000
-
-### 7. (Optional) Enable Neo4j for AI Recommendations
-
-```bash
-# Start Neo4j container (from project root)
-docker-compose up -d neo4j
-
-# Verify Neo4j is running
-docker ps | grep neo4j
-
-# Access Neo4j Browser
-# http://localhost:7474 (login: neo4j / mypassword)
-
-# Restart backend to sync data
-npm run db:reset  # Auto-syncs products to Neo4j
-npm run start:dev
-```
-
-Check logs for Neo4j status:
-```
-✅ Neo4j connection successful    # Neo4j is working
-⚠️ Neo4j unavailable              # Neo4j not running (optional, app still works)
-```
 
 ---
 
@@ -1039,64 +1009,6 @@ rm -rf dist
 npm run build
 ```
 
-### Neo4j Connection Issues
-
-**Problem:** `Neo4j unavailable. Recommendations will be disabled.`
-
-**Solution 1: Start Neo4j with docker-compose**
-```bash
-# Run from project root (where docker-compose.yml is)
-docker-compose up -d neo4j
-
-# Check if running
-docker ps | grep neo4j
-
-# View logs
-docker logs local_neo4j
-```
-
-**Solution 2: Reset Neo4j password**
-```bash
-# Stop container
-docker stop local_neo4j
-
-# Remove and recreate
-docker rm local_neo4j
-docker-compose up -d neo4j
-
-# New password: mypassword (from docker-compose.yml)
-# Update .env: NEO4J_PASSWORD=mypassword
-```
-
-**Solution 3: Access Neo4j Browser**
-```
-http://localhost:7474
-Username: neo4j
-Password: mypassword (from docker-compose.yml)
-```
-
-**Solution 4: Check connection from backend**
-```bash
-# Logs should show:
-npm run start:dev | grep -i neo4j
-
-# Should see:
-# ✅ Neo4j connection successful
-# OR (if Neo4j not running - that's OK):
-# ⚠️ Neo4j unavailable. Recommendations will be disabled.
-```
-
-**Note:** Neo4j is optional. If not running:
-- ✅ Main app still works fine
-- ❌ AI recommendations will be disabled
-- All other features work normally
-
-**To fully enable Neo4j:**
-1. Start: `docker-compose up -d neo4j`
-2. Add to .env: `NEO4J_PASSWORD=mypassword`
-3. Run: `npm run db:reset` (auto-syncs data)
-4. Restart: `npm run start:dev`
-
 ---
 
 ## 📞 API Testing Tools
@@ -1205,8 +1117,7 @@ src/
 ✅ User profile management  
 ✅ Address management  
 ✅ Order tracking & shipments  
-✅ AI Recommendations (Neo4j Graph Database)  
-✅ Frequently bought together suggestions  
+✅ Product recommendations (similar / trending)  
 
 ---
 

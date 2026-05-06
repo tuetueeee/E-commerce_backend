@@ -14,7 +14,6 @@ import {
   CartSummaryDto,
 } from '../../dto/cart.dto';
 import { VouchersService } from '../vouchers/vouchers.service';
-import { Neo4jService } from '../../config/neo4j.config';
 import {
   FirestoreCartData,
   FirestoreCartItemData,
@@ -29,7 +28,6 @@ export class CartService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private vouchersService: VouchersService,
-    private neo4jService: Neo4jService,
     private firestoreCartService: FirestoreCartService,
   ) {}
 
@@ -120,40 +118,6 @@ export class CartService {
         stock: product.stock,
       },
     });
-
-    if (this.neo4jService.isReady()) {
-      try {
-        await this.neo4jService.createViewedRelationship(userId, productId);
-
-        const blankProduct = await this.productRepository
-          .createQueryBuilder('product')
-          .leftJoinAndSelect('product.category', 'category')
-          .where('product.id = :id', { id: productId })
-          .andWhere('product.isActive = :isActive', { isActive: true })
-          .andWhere(
-            'NOT EXISTS (SELECT 1 FROM sku_variants sv WHERE sv."productId" = product.id)',
-          )
-          .getOne();
-
-        if (blankProduct) {
-          await this.neo4jService.createProduct(
-            blankProduct.id,
-            blankProduct.name,
-            blankProduct.category?.id || '',
-            blankProduct.price,
-            blankProduct.rating || 0,
-          );
-          if (blankProduct.category?.id) {
-            await this.neo4jService.linkProductToCategory(
-              blankProduct.id,
-              blankProduct.category.id,
-            );
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to create Neo4j viewed relationship:', error);
-      }
-    }
 
     const updatedCart = await this.firestoreCartService.getFullCart(userId);
     return this.formatCartResponse(updatedCart);

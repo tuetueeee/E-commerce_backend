@@ -313,36 +313,25 @@ RESPONSE (200):
 ]
 ```
 
-### 7. Get Trending Products (Neo4j AI)
+### 7. Get Trending Products
 ```
 GET /api/products/ai/trending
 Authorization: (optional)
 
 RESPONSE (200):
 [
-  { "id": "uuid", "name": "...", "trending_score": 0.95 }
+  { "id": "uuid", "name": "...", "rating": 4.8 }
 ]
 ```
 
-### 8. Get Similar Products (Neo4j AI)
+### 8. Get Similar Products
 ```
 GET /api/products/ai/similar/:productId
 Authorization: (optional)
 
 RESPONSE (200):
 [
-  { "id": "uuid", "name": "...", "similarity": 0.85 }
-]
-```
-
-### 9. Get Frequently Bought Together
-```
-GET /api/products/ai/frequently-bought/:productId
-Authorization: (optional)
-
-RESPONSE (200):
-[
-  { "id": "uuid", "name": "...", "frequency": 0.75 }
+  { "id": "uuid", "name": "...", "categoryId": "..." }
 ]
 ```
 
