@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Product } from '../../entities/product.entity';
+import { Product, ProductType } from '../../entities/product.entity';
 import { Category } from '../../entities/category.entity';
 import {
   CreateProductDto,
@@ -65,6 +65,7 @@ export class ProductsService {
       maxPrice,
       isNew,
       isFeatured,
+      productType,
       blanksOnly,
       readyMade,
       sortBy = 'createdAt',
@@ -110,18 +111,20 @@ export class ProductsService {
       });
     }
 
-    // Filter for blanks only (products without SKU variants/designs)
-    if (blanksOnly) {
-      queryBuilder.andWhere(
-        'NOT EXISTS (SELECT 1 FROM sku_variants sv WHERE sv."productId" = product.id)',
-      );
-    }
+    // Resolve productType: explicit param takes precedence; legacy
+    // blanksOnly/readyMade flags map onto the same column.
+    const resolvedType =
+      productType ??
+      (blanksOnly
+        ? ProductType.BLANK
+        : readyMade
+          ? ProductType.READY_MADE
+          : undefined);
 
-    // Filter for ready-made (products with SKU variants/designs)
-    if (readyMade) {
-      queryBuilder.andWhere(
-        'EXISTS (SELECT 1 FROM sku_variants sv WHERE sv."productId" = product.id)',
-      );
+    if (resolvedType) {
+      queryBuilder.andWhere('product.productType = :productType', {
+        productType: resolvedType,
+      });
     }
 
     // Apply sorting with validation
@@ -297,6 +300,7 @@ export class ProductsService {
       image: product.image,
       images: product.images,
       categoryId: product.categoryId,
+      productType: product.productType,
       isActive: product.isActive,
       isNew: product.isNew,
       isFeatured: product.isFeatured,
@@ -356,9 +360,9 @@ export class ProductsService {
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.skuVariants', 'skuVariants')
       .where('product.isActive = :isActive', { isActive: true })
-      .andWhere(
-        'NOT EXISTS (SELECT 1 FROM sku_variants sv WHERE sv."productId" = product.id)',
-      )
+      .andWhere('product.productType = :productType', {
+        productType: ProductType.BLANK,
+      })
       .orderBy('product.rating', 'DESC')
       .addOrderBy('product.numReviews', 'DESC')
       .addOrderBy('product.createdAt', 'DESC')

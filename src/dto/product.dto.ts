@@ -5,12 +5,16 @@ import {
   IsBoolean,
   IsUUID,
   IsArray,
+  IsEnum,
   Min,
   Max,
   IsNotEmpty,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ProductType } from '../entities/product.entity';
+
+export { ProductType };
 
 export class CreateProductDto {
   @IsString()
@@ -53,6 +57,9 @@ export class CreateProductDto {
 
   @IsUUID()
   categoryId: string;
+
+  @IsEnum(ProductType)
+  productType: ProductType;
 
   @IsOptional()
   @IsBoolean()
@@ -113,6 +120,10 @@ export class UpdateProductDto {
   categoryId?: string;
 
   @IsOptional()
+  @IsEnum(ProductType)
+  productType?: ProductType;
+
+  @IsOptional()
   @IsBoolean()
   isNew?: boolean;
 
@@ -157,14 +168,18 @@ export class ProductQueryDto {
   isFeatured?: boolean;
 
   @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  blanksOnly?: boolean; // Only products without designs
+  @IsEnum(ProductType)
+  productType?: ProductType;
 
   @IsOptional()
   @IsBoolean()
   @Type(() => Boolean)
-  readyMade?: boolean; // Only products with designs
+  blanksOnly?: boolean; // Backward-compat: maps to productType=BLANK
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  readyMade?: boolean; // Backward-compat: maps to productType=READY_MADE
 
   @IsOptional()
   @IsString()
@@ -244,6 +259,7 @@ export class ProductResponseDto {
   image?: string;
   images: string[];
   categoryId: string;
+  productType: ProductType;
   isActive: boolean;
   isNew: boolean;
   isFeatured: boolean;

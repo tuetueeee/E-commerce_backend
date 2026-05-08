@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Product } from '../../entities/product.entity';
+import { Product, ProductType } from '../../entities/product.entity';
 import { User } from '../../entities/user.entity';
 import {
   AddToCartDto,
@@ -94,6 +94,22 @@ export class CartService {
 
     await this.validateUser(userId);
     const product = await this.getActiveProduct(productId);
+
+    // Enforce per-type rules:
+    // - BLANK: customer must pick a design (designId or customDesignData)
+    //   before adding to the cart.
+    // - READY_MADE: design payload is rejected — the printed design is fixed.
+    const hasDesign = Boolean(designId || customDesignData);
+    if (product.productType === ProductType.BLANK && !hasDesign) {
+      throw new BadRequestException(
+        `Sản phẩm phôi "${product.name}" yêu cầu chọn thiết kế trước khi thêm vào giỏ.`,
+      );
+    }
+    if (product.productType === ProductType.READY_MADE && hasDesign) {
+      throw new BadRequestException(
+        `Sản phẩm "${product.name}" đã có thiết kế in sẵn, không thể tùy chỉnh.`,
+      );
+    }
 
     if (product.stock < quantity) {
       throw new BadRequestException(

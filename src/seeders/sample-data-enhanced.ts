@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { User, UserRole } from '../entities/user.entity';
 import { Category } from '../entities/category.entity';
-import { Product } from '../entities/product.entity';
+import { Product, ProductType } from '../entities/product.entity';
 import { Order, OrderStatus, PaymentStatus } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
 import { Cart } from '../entities/cart.entity';
@@ -239,42 +239,48 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         id: CAT_SHIRTS_ID,
         name: 'Áo sơ mi & Áo thun',
         description: 'Áo sơ mi, áo thun nam nữ đa dạng kiểu dáng.',
-        image: 'https://placehold.co/300x200/F0E68C/000000&text=Ao+So+Mi',
+        image:
+          'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&q=80',
         isActive: true,
       },
       {
         id: CAT_JEANS_ID,
         name: 'Quần Jeans & Kaki',
         description: 'Quần jeans, quần kaki thời trang, bền đẹp.',
-        image: 'https://placehold.co/300x200/B0E0E6/000000&text=Quan+Jeans',
+        image:
+          'https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&q=80',
         isActive: true,
       },
       {
         id: CAT_DRESSES_ID,
         name: 'Váy Đầm & Chân váy',
         description: 'Váy đầm dự tiệc, dạo phố, công sở thanh lịch.',
-        image: 'https://placehold.co/300x200/FFB6C1/000000&text=Vay+Dam',
+        image:
+          'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80',
         isActive: true,
       },
       {
         id: CAT_JACKETS_ID,
         name: 'Áo Khoác',
         description: 'Áo khoác giữ ấm, chống nắng và thời trang.',
-        image: 'https://placehold.co/300x200/D3D3D3/000000&text=Ao+Khoac',
+        image:
+          'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80',
         isActive: true,
       },
       {
         id: CAT_ACCESSORIES_ID,
         name: 'Phụ kiện Thời trang',
         description: 'Mũ, túi, thắt lưng, trang sức.',
-        image: 'https://placehold.co/300x200/FFE4B5/000000&text=Phu+Kien',
+        image:
+          'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80',
         isActive: true,
       },
       {
         id: CAT_SPORTSWEAR_ID,
         name: 'Đồ Thể Thao',
         description: 'Quần áo và phụ kiện thể thao.',
-        image: 'https://placehold.co/300x200/90EE90/000000&text=Do+The+Thao',
+        image:
+          'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',
         isActive: true,
       },
     ];
@@ -379,7 +385,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 200000,
         stock: 100,
         categoryId: CAT_SHIRTS_ID,
-        image: 'https://placehold.co/600x400/333333/FFFFFF&text=Ao+Thun+Den',
+        image:
+          'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80',
         isActive: true,
         quantity: 100,
       },
@@ -391,7 +398,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 520000,
         stock: 40,
         categoryId: CAT_SHIRTS_ID,
-        image: 'https://placehold.co/600x400/F5F5F5/000000&text=Ao+Linen',
+        image:
+          'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800&q=80',
         isActive: true,
         quantity: 40,
       },
@@ -403,7 +411,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 220000,
         stock: 80,
         categoryId: CAT_SHIRTS_ID,
-        image: 'https://placehold.co/600x400/C0C0C0/000000&text=Ao+Graphic',
+        image:
+          'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=80',
         isActive: true,
         quantity: 80,
       },
@@ -441,7 +450,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 680000,
         stock: 35,
         categoryId: CAT_JEANS_ID,
-        image: 'https://placehold.co/600x400/ADD8E6/000000&text=Jean+Relaxed',
+        image:
+          'https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800&q=80',
         isActive: true,
         quantity: 35,
       },
@@ -453,7 +463,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 350000,
         stock: 70,
         categoryId: CAT_JEANS_ID,
-        image: 'https://placehold.co/600x400/F5F5DC/000000&text=Short+Kaki',
+        image:
+          'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80',
         isActive: true,
         quantity: 70,
       },
@@ -542,7 +553,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 450000,
         stock: 55,
         categoryId: CAT_SPORTSWEAR_ID,
-        image: 'https://placehold.co/600x400/87CEFA/000000&text=Ao+The+Thao',
+        image:
+          'https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?w=800&q=80',
         isActive: true,
         quantity: 55,
       },
@@ -554,7 +566,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 380000,
         stock: 65,
         categoryId: CAT_SPORTSWEAR_ID,
-        image: 'https://placehold.co/600x400/FF69B4/FFFFFF&text=Quan+The+Thao',
+        image:
+          'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80',
         isActive: true,
         quantity: 65,
       },
@@ -567,7 +580,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 200000,
         stock: 120,
         categoryId: CAT_SHIRTS_ID,
-        image: 'https://placehold.co/600x400/FFFFFF/000000&text=Ao+Thun+Trang',
+        image:
+          'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80',
         isActive: true,
         quantity: 120,
         averageRating: 4.6,
@@ -583,7 +597,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 200000,
         stock: 110,
         categoryId: CAT_SHIRTS_ID,
-        image: 'https://placehold.co/600x400/808080/FFFFFF&text=Ao+Thun+Xam',
+        image:
+          'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80',
         isActive: true,
         quantity: 110,
         averageRating: 4.4,
@@ -599,7 +614,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 200000,
         stock: 95,
         categoryId: CAT_SHIRTS_ID,
-        image: 'https://placehold.co/600x400/000080/FFFFFF&text=Ao+Thun+Navy',
+        image:
+          'https://images.unsplash.com/photo-1582142306909-195724d33ffc?w=800&q=80',
         isActive: true,
         quantity: 95,
         averageRating: 4.5,
@@ -615,7 +631,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 350000,
         stock: 80,
         categoryId: CAT_SHIRTS_ID,
-        image: 'https://placehold.co/600x400/0066CC/FFFFFF&text=Ao+Polo',
+        image:
+          'https://images.unsplash.com/photo-1620799139507-2a76f79a2f4d?w=800&q=80',
         isActive: true,
         quantity: 80,
         averageRating: 4.7,
@@ -631,7 +648,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 550000,
         stock: 60,
         categoryId: CAT_JACKETS_ID,
-        image: 'https://placehold.co/600x400/333333/FFFFFF&text=Hoodie',
+        image:
+          'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80',
         isActive: true,
         quantity: 60,
         averageRating: 4.8,
@@ -647,7 +665,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 450000,
         stock: 70,
         categoryId: CAT_JACKETS_ID,
-        image: 'https://placehold.co/600x400/666666/FFFFFF&text=Sweatshirt',
+        image:
+          'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80',
         isActive: true,
         quantity: 70,
         averageRating: 4.6,
@@ -663,7 +682,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 680000,
         stock: 50,
         categoryId: CAT_JEANS_ID,
-        image: 'https://placehold.co/600x400/191970/FFFFFF&text=Jean+Blue',
+        image:
+          'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&q=80',
         isActive: true,
         quantity: 50,
         averageRating: 4.5,
@@ -679,7 +699,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 720000,
         stock: 45,
         categoryId: CAT_JEANS_ID,
-        image: 'https://placehold.co/600x400/000000/FFFFFF&text=Jean+Black',
+        image:
+          'https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800&q=80',
         isActive: true,
         quantity: 45,
         averageRating: 4.7,
@@ -695,7 +716,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 480000,
         stock: 55,
         categoryId: CAT_JEANS_ID,
-        image: 'https://placehold.co/600x400/8B7355/FFFFFF&text=Chino',
+        image:
+          'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80',
         isActive: true,
         quantity: 55,
         averageRating: 4.4,
@@ -711,7 +733,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 420000,
         stock: 40,
         categoryId: CAT_DRESSES_ID,
-        image: 'https://placehold.co/600x400/FFB6C1/000000&text=Skirt+A-Line',
+        image:
+          'https://images.unsplash.com/photo-1611312449412-6cefac5dc3e4?w=800&q=80',
         isActive: true,
         quantity: 40,
         averageRating: 4.6,
@@ -727,7 +750,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 450000,
         stock: 35,
         categoryId: CAT_DRESSES_ID,
-        image: 'https://placehold.co/600x400/FF69B4/FFFFFF&text=Skirt+Pencil',
+        image:
+          'https://images.unsplash.com/photo-1577900232427-18219b9166a0?w=800&q=80',
         isActive: true,
         quantity: 35,
         averageRating: 4.5,
@@ -743,7 +767,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 580000,
         stock: 30,
         categoryId: CAT_DRESSES_ID,
-        image: 'https://placehold.co/600x400/FFC0CB/000000&text=Dress+Casual',
+        image:
+          'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80',
         isActive: true,
         quantity: 30,
         averageRating: 4.7,
@@ -759,7 +784,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 680000,
         stock: 25,
         categoryId: CAT_DRESSES_ID,
-        image: 'https://placehold.co/600x400/9370DB/FFFFFF&text=Dress+Office',
+        image:
+          'https://images.unsplash.com/photo-1572804013427-4d7ca7268217?w=800&q=80',
         isActive: true,
         quantity: 25,
         averageRating: 4.8,
@@ -775,7 +801,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 1200000,
         stock: 20,
         categoryId: CAT_JACKETS_ID,
-        image: 'https://placehold.co/600x400/8B4513/FFFFFF&text=Trench+Coat',
+        image:
+          'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80',
         isActive: true,
         quantity: 20,
         averageRating: 4.9,
@@ -791,7 +818,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 750000,
         stock: 40,
         categoryId: CAT_JACKETS_ID,
-        image: 'https://placehold.co/600x400/4169E1/FFFFFF&text=Denim+Jacket',
+        image:
+          'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&q=80',
         isActive: true,
         quantity: 40,
         averageRating: 4.6,
@@ -807,7 +835,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 650000,
         stock: 35,
         categoryId: CAT_JACKETS_ID,
-        image: 'https://placehold.co/600x400/DEB887/000000&text=Cardigan',
+        image:
+          'https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=800&q=80',
         isActive: true,
         quantity: 35,
         averageRating: 4.5,
@@ -823,7 +852,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 180000,
         stock: 90,
         categoryId: CAT_ACCESSORIES_ID,
-        image: 'https://placehold.co/600x400/2F4F4F/FFFFFF&text=Beanie',
+        image:
+          'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&q=80',
         isActive: true,
         quantity: 90,
         averageRating: 4.4,
@@ -839,7 +869,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 380000,
         stock: 50,
         categoryId: CAT_ACCESSORIES_ID,
-        image: 'https://placehold.co/600x400/8B4513/FFFFFF&text=Backpack',
+        image:
+          'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80',
         isActive: true,
         quantity: 50,
         averageRating: 4.7,
@@ -855,7 +886,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 280000,
         stock: 75,
         categoryId: CAT_SPORTSWEAR_ID,
-        image: 'https://placehold.co/600x400/FF4500/FFFFFF&text=Tank+Top',
+        image:
+          'https://images.unsplash.com/photo-1485231183945-fffde7cc051e?w=800&q=80',
         isActive: true,
         quantity: 75,
         averageRating: 4.5,
@@ -871,7 +903,8 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         price: 420000,
         stock: 60,
         categoryId: CAT_SPORTSWEAR_ID,
-        image: 'https://placehold.co/600x400/9370DB/FFFFFF&text=Yoga+Pants',
+        image:
+          'https://images.unsplash.com/photo-1610847499832-918a1c3c6811?w=800&q=80',
         isActive: true,
         quantity: 60,
         averageRating: 4.6,
@@ -880,7 +913,29 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
         isFeatured: true,
       },
     ];
-    await dataSource.getRepository(Product).save(products);
+    // BLANK = phôi áo, khách có thể tự chọn/upload thiết kế trước khi đặt hàng.
+    // READY_MADE = áo đã in thiết kế, không cho phép custom thêm.
+    const BLANK_PRODUCT_IDS = new Set<string>([
+      PROD_TSHIRT_1_ID,
+      PROD_LINEN_SHIRT_ID,
+      PROD_TSHIRT_WHITE_ID,
+      PROD_TSHIRT_GRAY_ID,
+      PROD_TSHIRT_NAVY_ID,
+      PROD_POLO_SHIRT_ID,
+      PROD_HOODIE_ID,
+      PROD_SWEATSHIRT_ID,
+      PROD_BEANIE_ID,
+      PROD_SPORTS_TANK_ID,
+    ]);
+
+    await dataSource.getRepository(Product).save(
+      products.map((p) => ({
+        ...p,
+        productType: BLANK_PRODUCT_IDS.has(p.id)
+          ? ProductType.BLANK
+          : ProductType.READY_MADE,
+      })),
+    );
 
     // 6. ADDRESSES (Dùng từ Enhanced, có thêm cho Charlie)
     const addresses = [

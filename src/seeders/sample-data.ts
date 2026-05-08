@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { User, UserRole } from '../entities/user.entity';
 import { Category } from '../entities/category.entity';
-import { Product } from '../entities/product.entity';
+import { Product, ProductType } from '../entities/product.entity';
 import { Review } from '../entities/review.entity';
 import { Order, OrderStatus, PaymentStatus } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
@@ -569,7 +569,22 @@ export async function seedDatabase(dataSource: DataSource) {
       },
     ];
 
-    await dataSource.getRepository(Product).save(products);
+    // BLANK = phôi áo (cho phép khách chọn/upload thiết kế).
+    // READY_MADE = áo đã in thiết kế, không cho phép custom.
+    const BLANK_PRODUCT_IDS = new Set<string>([
+      PROD_TSHIRT_1_ID,
+      PROD_LINEN_SHIRT_ID,
+      PROD_SPORT_SHIRT_ID,
+    ]);
+
+    await dataSource.getRepository(Product).save(
+      products.map((p) => ({
+        ...p,
+        productType: BLANK_PRODUCT_IDS.has(p.id)
+          ? ProductType.BLANK
+          : ProductType.READY_MADE,
+      })),
+    );
 
     // Create reviews
     const reviews = [

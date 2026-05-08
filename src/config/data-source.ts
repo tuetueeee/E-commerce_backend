@@ -28,15 +28,9 @@ if (fs.existsSync(envPath)) {
 // DataSource configuration for migrations and CLI
 const configService = new ConfigService();
 
-// Validate required environment variables
-const dbPassword = configService.get<string>('DB_PASSWORD');
-if (!dbPassword) {
-  console.error('❌ Error: DB_PASSWORD is not set in .env file');
-  console.error(
-    '💡 Please create .env file in retail-store-nestjs/ with DB_PASSWORD=mypassword',
-  );
-  process.exit(1);
-}
+// DB_PASSWORD may legitimately be empty when Postgres is configured with trust
+// auth on localhost, so don't hard-fail; just default to an empty string.
+const dbPassword = configService.get<string>('DB_PASSWORD') ?? '';
 
 const dbHost = configService.get<string>('DB_HOST', 'localhost');
 const dbUser = configService.get<string>('DB_USER') || configService.get<string>('DB_USERNAME', 'myuser');

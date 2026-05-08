@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Order, OrderStatus, PaymentStatus } from '../../entities/order.entity';
 import { OrderItem } from '../../entities/order-item.entity';
-import { Product } from '../../entities/product.entity';
+import { Product, ProductType } from '../../entities/product.entity';
 import { User } from '../../entities/user.entity';
 import { SkuVariant } from '../../entities/sku-variant.entity';
 import { Stock } from '../../entities/stock.entity';
@@ -88,73 +88,51 @@ export class OrdersService {
         );
       }
 
-      // Find SKU variant - REQUIRED since OrderItem.skuId is NOT nullable
-      let skuVariant: SkuVariant | null = null;
-
-      // Try to find SKU variant by color and size if provided
-      if (item.colorCode && item.sizeCode) {
-        skuVariant = await this.skuVariantRepository.findOne({
-          where: {
-            productId: item.productId,
-            ColorCode: item.colorCode,
-            SizeCode: item.sizeCode,
-          },
-        });
-      }
-
-      // If exact SKU not found, try to find any SKU for this product
-      if (!skuVariant) {
-        skuVariant = await this.skuVariantRepository.findOne({
-          where: { productId: item.productId },
-        });
-      }
-
-      // If still no SKU found, create a default SKU variant for custom designs
-      // This allows products with custom designs to be ordered even without pre-configured SKUs
-      if (!skuVariant) {
-        this.logger.warn(
-          `No SKU variant found for product ${product.name} (${item.productId}). Creating default SKU for custom design order.`,
-        );
-        
-        // Create a default SKU variant in DB for this product/color/size combination
-        const newSkuVariant = this.skuVariantRepository.create({
-          productId: item.productId,
-          SizeCode: item.sizeCode || 'M',
-          ColorCode: item.colorCode || 'BLACK',
-          price: item.price || product.price || 0,
-          weight_grams: 0,
-          base_cost: 0,
-          sku_name: `${product.name} - ${item.sizeCode || 'M'} - ${item.colorCode || 'BLACK'}`,
-          avai_status: 'available',
-          currency: 'VND',
-          designId: item.designId || undefined, // Use undefined instead of null
-        });
-        
-        const savedSkuVariant = await this.skuVariantRepository.save(newSkuVariant);
-        // save() can return SkuVariant or SkuVariant[], handle both cases
-        const saved = Array.isArray(savedSkuVariant) ? savedSkuVariant[0] : savedSkuVariant;
-        if (!saved) {
-          throw new BadRequestException(
-            `Failed to create SKU variant for product ${product.name}.`,
-          );
-        }
-        // Assign to skuVariant after null check
-        skuVariant = saved;
-        // Now TypeScript knows skuVariant is not null
-        this.logger.log(`Created default SKU variant ${saved.SkuID} for product ${product.name}`);
-      }
-
-      // At this point, skuVariant should never be null, but TypeScript doesn't know that
-      if (!skuVariant) {
+      // Validate design payload against product type:
+      // - BLANK products require either a chosen designId or customDesignData
+      // - READY_MADE products must NOT receive any design payload (the product
+      //   has its design printed in by the shop)
+      const hasDesign = Boolean(item.designId || item.customDesignData);
+      if (product.productType === ProductType.BLANK && !hasDesign) {
         throw new BadRequestException(
-          `Failed to create or find SKU variant for product ${product.name}.`,
+          `Sản phẩm phôi "${product.name}" yêu cầu chọn thiết kế trước khi đặt hàng.`,
+        );
+      }
+      if (product.productType === ProductType.READY_MADE && hasDesign) {
+        throw new BadRequestException(
+          `Sản phẩm "${product.name}" đã có thiết kế in sẵn, không thể chỉnh sửa thêm.`,
+        );
+      }
+
+      // Resolve SKU variant by (productId + colorCode + sizeCode). Both BLANK
+      // and READY_MADE products must have pre-configured SKUs covering the
+      // requested size/color combination.
+      if (!item.colorCode || !item.sizeCode) {
+        throw new BadRequestException(
+          `Vui lòng chọn size và màu cho sản phẩm "${product.name}".`,
+        );
+      }
+
+      const skuVariant = await this.skuVariantRepository.findOne({
+        where: {
+          productId: item.productId,
+          ColorCode: item.colorCode,
+          SizeCode: item.sizeCode,
+        },
+      });
+
+      if (!skuVariant) {
+        throw new NotFoundException(
+          `Không tìm thấy phiên bản size ${item.sizeCode} màu ${item.colorCode} của sản phẩm "${product.name}".`,
         );
       }
 
       const skuId = skuVariant.SkuID;
 
-      // Check stock - try SKU variant stock first, fallback to product stock
-      // For custom designs, be more lenient with stock checks
+      // Check stock for the SKU. If the inventory record is missing, fall back
+      // to the product-level stock. We no longer special-case "custom design"
+      // orders because BLANK products go through the same SKU pipeline as
+      // READY_MADE products now.
       try {
         const stock = await this.inventoryService.getBySku(skuId);
         const availableStock = stock.qty_on_hand - stock.qty_reserved;
@@ -165,30 +143,15 @@ export class OrdersService {
           );
         }
       } catch (error: any) {
-        // If stock not found for SKU, fallback to product stock
         if (error instanceof NotFoundException) {
-          // For custom designs or when stock not found, use product stock or allow order
-          const productStock = product.stock || 999; // Default to high stock if not set
-          if (productStock < item.quantity && !item.designId && !item.customDesignData) {
+          const productStock = product.stock ?? 0;
+          if (productStock < item.quantity) {
             throw new BadRequestException(
               `Insufficient stock for product ${product.name}. Available: ${productStock}`,
             );
           }
-          // For custom designs, allow order even if stock is not tracked
-          this.logger.warn(
-            `Stock not found for SKU ${skuId}, but allowing order for custom design product ${product.name}`,
-          );
-        } else if (error instanceof BadRequestException) {
-          throw error; // Re-throw our own stock errors
         } else {
-          // For other errors, log but allow order for custom designs
-          if (item.designId || item.customDesignData) {
-            this.logger.warn(
-              `Stock check error for custom design: ${error.message}. Allowing order to proceed.`,
-            );
-          } else {
-            throw error;
-          }
+          throw error;
         }
       }
 
@@ -252,30 +215,24 @@ export class OrdersService {
         );
         orderItems.push(savedOrderItem);
 
-        // Reserve stock for SKU variant (if exists) or update product stock
-        if (item.skuVariant && item.skuId !== item.productId) {
-          try {
-            // Reserve stock using InventoryService
-            await this.inventoryService.reserve(
-              item.skuId,
-              item.quantity,
-              `Order ${savedOrder.id}`,
-              'order',
-              savedOrder.id,
-            );
-            this.logger.log(
-              `Reserved ${item.quantity} units of SKU ${item.skuId} for order ${savedOrder.id}`,
-            );
-          } catch (error: any) {
-            this.logger.error(
-              `Failed to reserve stock for SKU ${item.skuId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            );
-            // Fallback to product stock update
-            item.product.stock -= item.quantity;
-            await queryRunner.manager.save(Product, item.product);
-          }
-        } else {
-          // Update product stock directly (fallback)
+        // Reserve stock at the SKU level. If the inventory record is missing,
+        // fall back to decrementing the product-level stock so the order still
+        // succeeds for products that haven't been migrated to per-SKU stock.
+        try {
+          await this.inventoryService.reserve(
+            item.skuId,
+            item.quantity,
+            `Order ${savedOrder.id}`,
+            'order',
+            savedOrder.id,
+          );
+          this.logger.log(
+            `Reserved ${item.quantity} units of SKU ${item.skuId} for order ${savedOrder.id}`,
+          );
+        } catch (error: any) {
+          this.logger.error(
+            `Failed to reserve stock for SKU ${item.skuId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          );
           item.product.stock -= item.quantity;
           await queryRunner.manager.save(Product, item.product);
         }

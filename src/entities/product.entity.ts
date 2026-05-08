@@ -17,11 +17,19 @@ import { OrderItem } from './order-item.entity';
 import { Material } from './material.entity';
 import { SkuVariant } from './sku-variant.entity';
 
+export enum ProductType {
+  // Phôi áo: khách có thể chọn/upload thiết kế trước khi thêm vào giỏ
+  BLANK = 'BLANK',
+  // Áo có thiết kế in sẵn: không cho khách custom
+  READY_MADE = 'READY_MADE',
+}
+
 @Entity('products')
 @Index(['title'])
 @Index(['categoryId'])
 @Index(['isNew'])
 @Index(['isFeatured'])
+@Index(['productType'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -69,6 +77,13 @@ export class Product {
 
   @Column({ type: 'uuid' })
   categoryId: string;
+
+  @Column({
+    type: 'enum',
+    enum: ProductType,
+    default: ProductType.BLANK,
+  })
+  productType: ProductType;
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
