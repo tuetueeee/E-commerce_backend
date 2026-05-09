@@ -50,7 +50,14 @@ export class OrdersService {
     userId: string,
     createOrderDto: CreateOrderDto,
   ): Promise<OrderResponseDto> {
-    const { items, shippingAddress, paymentMethod, notes } = createOrderDto;
+    const {
+      items,
+      shippingAddress,
+      paymentMethod,
+      notes,
+      shippingCost = 0,
+      discount = 0,
+    } = createOrderDto;
 
     // Verify user exists
     const user = await this.userRepository.findOne({
@@ -179,12 +186,23 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     try {
+      // Order totals: clamp inputs to >= 0, then Total = Subtotal - Discount + ShippingCost.
+      // Discount is capped at Subtotal so Total can never go negative.
+      const safeShipping = Math.max(0, Number(shippingCost) || 0);
+      const safeDiscount = Math.min(
+        totalAmount,
+        Math.max(0, Number(discount) || 0),
+      );
+      const finalTotal = totalAmount - safeDiscount + safeShipping;
+
       // Create order
       const order = this.orderRepository.create({
         userId,
         Status: OrderStatus.PENDING,
         Subtotal: totalAmount,
-        Total: totalAmount,
+        Discount: safeDiscount,
+        ShippingCost: safeShipping,
+        Total: finalTotal,
         Order_date: new Date(),
         shippingAddress,
         paymentMethod,
@@ -570,16 +588,17 @@ export class OrdersService {
   }
 
   private formatOrderResponse(order: Order): OrderResponseDto {
-    // Parse Total from decimal string to number
-    const totalAmount = typeof order.totalAmount === 'string' 
-      ? parseFloat(order.totalAmount) 
-      : (order.totalAmount || 0);
-    
+    const num = (v: unknown): number =>
+      typeof v === 'string' ? parseFloat(v) : Number(v) || 0;
+
     return {
       id: order.id,
       userId: order.userId,
       status: order.status,
-      totalAmount: totalAmount,
+      subtotal: num(order.Subtotal),
+      shippingCost: num(order.ShippingCost),
+      discount: num(order.Discount),
+      totalAmount: num(order.totalAmount),
       shippingAddress: order.shippingAddress,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,

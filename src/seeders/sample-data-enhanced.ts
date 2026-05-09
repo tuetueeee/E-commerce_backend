@@ -1538,6 +1538,53 @@ export async function seedDatabaseEnhanced(dataSource: DataSource) {
       savedStocks.push(stock);
     }
 
+    // Seed full size × color SKU grid for BLANK products so the customizer →
+    // checkout flow can resolve any combo the user picks. READY_MADE products
+    // above only get a single (M, BLACK) SKU because their design is fixed.
+    const blankProducts = await dataSource.getRepository(Product).find({
+      where: Array.from(BLANK_PRODUCT_IDS).map((id) => ({ id })),
+    });
+    const BLANK_SIZES = ['S', 'M', 'L', 'XL'];
+    const BLANK_COLORS = ['BLACK', 'WHITE', 'RED', 'BLUE', 'GREEN'];
+    for (const product of blankProducts) {
+      const perVariantStock = Math.max(
+        5,
+        Math.floor((product.quantity || 50) / (BLANK_SIZES.length * BLANK_COLORS.length)),
+      );
+      // Skip combos that already have a SKU (PROD_TSHIRT_1_ID is in both
+      // BLANK_PRODUCT_IDS and productsForSku above, which seeded an M-BLACK SKU).
+      const existingForProduct = await dataSource
+        .getRepository(SkuVariant)
+        .find({ where: { productId: product.id } });
+      const existingKeys = new Set(
+        existingForProduct.map((s) => `${s.SizeCode}-${s.ColorCode}`),
+      );
+      for (const sizeCode of BLANK_SIZES) {
+        for (const colorCode of BLANK_COLORS) {
+          if (existingKeys.has(`${sizeCode}-${colorCode}`)) continue;
+          const sku = await dataSource.getRepository(SkuVariant).save({
+            productId: product.id,
+            SizeCode: sizeCode,
+            ColorCode: colorCode,
+            price: product.price,
+            weight_grams: 250,
+            base_cost: Number(product.price) * 0.6,
+            sku_name: `${product.name}-${sizeCode}-${colorCode}`,
+            avai_status: 'available',
+            currency: 'VND',
+          });
+          const stock = await dataSource.getRepository(Stock).save({
+            skuId: sku.SkuID,
+            qty_inbound: perVariantStock,
+            qty_outbound: 0,
+            qty_on_hand: perVariantStock,
+            qty_reserved: 0,
+          });
+          savedStocks.push(stock);
+        }
+      }
+    }
+
     // 15. ORDERS
     const order1Date = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
     const order2Date = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);

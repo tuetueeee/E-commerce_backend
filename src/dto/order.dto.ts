@@ -74,6 +74,16 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  shippingCost?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discount?: number;
 }
 
 export class UpdateOrderStatusDto {
@@ -112,6 +122,9 @@ export class OrderResponseDto {
   id: string;
   userId: string;
   status: OrderStatus;
+  subtotal: number;
+  shippingCost: number;
+  discount: number;
   totalAmount: number;
   shippingAddress: string;
   paymentMethod: string;

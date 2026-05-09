@@ -58,6 +58,9 @@ export class Order {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   Discount: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  ShippingCost: number;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   Total: number;
 
